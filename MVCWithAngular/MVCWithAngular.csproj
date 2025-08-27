@@ -1,0 +1,55 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <SpaRoot>ClientApp\</SpaRoot>
+    <SpaBuildServerCommand>npm start</SpaBuildServerCommand>
+    <SpaPublishCommand>npm run build</SpaPublishCommand>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="8.0.0" />
+  </ItemGroup>
+
+  <Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">
+    <Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
+    <Exec WorkingDirectory="$(SpaRoot)" Command="npm run build" />
+
+    <ItemGroup>
+      <DistFiles Include="$(SpaRoot)dist\**" />
+      <ResolvedFileToPublish Include="@(DistFiles->'%(FullPath)')" Exclude="$(SpaRoot)node_modules\**">
+        <RelativePath>wwwroot\angular\%(RecursiveDir)%(FileName)%(Extension)</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      </ResolvedFileToPublish>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="BuildAngular" BeforeTargets="Build">
+    <Message Text="Building Angular application..." Importance="high" />
+
+    <Exec WorkingDirectory="$(SpaRoot)" Command="npm install" Condition="!Exists('$(SpaRoot)node_modules')" />
+
+    <Exec WorkingDirectory="$(SpaRoot)" Command="npm run build" />
+
+    <!-- Ensure index.html and CSS files are copied to wwwroot/angular -->
+    <ItemGroup>
+      <AngularBuildFiles Include="$(SpaRoot)dist\**\*" />
+    </ItemGroup>
+    
+    <Copy SourceFiles="@(AngularBuildFiles)" DestinationFolder="wwwroot\angular" />
+
+    <Message Text="Angular build completed successfully!" Importance="high" />
+  </Target>
+
+  <Target Name="CleanAngular" BeforeTargets="Clean">
+    <Message Text="Cleaning Angular build output..." Importance="high" />
+
+    <RemoveDir Directories="wwwroot\angular" />
+
+    <Message Text="Angular clean completed!" Importance="high" />
+  </Target>
+
+</Project>
